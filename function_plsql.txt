@@ -1,0 +1,17 @@
+create or replace function "REGISTERFUNCTIONCUSTOMER"
+(
+name IN VARCHAR2,
+dob IN DATE,
+contact IN NUMBER,
+city IN VARCHAR2)
+return VARCHAR2
+is
+cusid varchar2(10);
+begin
+
+SELECT 'CUS' || SUBSTR(NAME, LENGTH(NAME)-1)||
+SUBSTR(EXTRACT(YEAR FROM DOB),3) || CUS_SEQ.NEXTVAL INTO CUSID FROM DUAL;
+return cusid;
+insert into customer(cusid,name,dob,contact,city)
+values(cusid,name,dob,contact,city);
+end;

@@ -1,0 +1,15 @@
+create or replace procedure "REGISTERCUSTOMER"
+(cusid OUT VARCHAR2,
+name IN VARCHAR2,
+dob IN DATE,
+contact IN NUMBER,
+city IN VARCHAR2)
+IS
+
+begin
+SELECT 'CUS' || SUBSTR(NAME, LENGTH(NAME)-1)||
+SUBSTR(EXTRACT(YEAR FROM DOB),3) || CUS_SEQ.NEXTVAL INTO CUSID FROM DUAL;
+
+insert into customer(cusid,name,dob,contact,city)
+values(cusid,name,dob,contact,city);
+end;

@@ -1,0 +1,224 @@
+package com.jdbc.assignment.product;
+
+import java.io.Serializable;
+import java.util.Date;
+
+public class Product implements Serializable {
+
+	private int pId;
+	private String productName;
+	private Date dateOfManuf;
+	private Date dateOfExp;
+	private int quantity;
+	private double price;
+
+	public Product() {
+		System.out.println(this.getClass().getSimpleName() + " class object is created");
+	}
+
+	public Product(int pId, String productName, Date dateOfManuf, Date dateOfExp, int quantity, double price) {
+		this.pId = pId;
+		this.productName = productName;
+		this.dateOfManuf = dateOfManuf;
+		this.dateOfExp = dateOfExp;
+		this.quantity = quantity;
+		this.price = price;
+	}
+
+	public int getpId() {
+		return pId;
+	}
+
+	public void setpId(int pId) {
+		this.pId = pId;
+	}
+
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+	public Date getDateOfManuf() {
+		return dateOfManuf;
+	}
+
+	public void setDateOfManuf(Date dateOfManuf) {
+		this.dateOfManuf = dateOfManuf;
+	}
+
+	public Date getDateOfExp() {
+		return dateOfExp;
+	}
+
+	public void setDateOfExp(Date dateOfExp) {
+		this.dateOfExp = dateOfExp;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+}
+
+
+*********************************************************************************************************************************
+
+package com.jdbc.assignment.util;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class OracleDBConnection {
+
+	private static Connection connection;
+
+	public static Connection getConnection() throws ClassNotFoundException, SQLException {
+		Class.forName("oracle.jdbc.OracleDriver");
+		connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl", "hr", "hr");
+		return connection;
+	}
+}
+
+**********************************************************************************************************************************
+
+package com.jdbc.assignment.appTester;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Scanner;
+
+import com.jdbc.assignment.product.Product;
+import com.jdbc.assignment.util.OracleDBConnection;
+
+public class AppTester {
+
+	public static void main(String[] args) throws ParseException {
+
+//		System.out.println("Enter the id");
+//		int id = scan.nextInt();
+//		System.out.println("Enter the product name");
+//		String pName = scan.next();
+//		System.out.println("Enter the Manufacture date");
+//		String mafDate = scan.next();
+//		System.out.println("Enter the expiry date");
+//		String expDate = scan.next();
+//		System.out.println("Enter the quantity");
+//		int qty = scan.nextInt();
+//		System.out.println("Enter the price");
+//		double price = scan.nextDouble();
+
+		do {
+			Scanner scan = new Scanner(System.in);
+
+			System.out.println("1. Insert");
+			System.out.println("2. Read");
+			System.out.println("3. Exit");
+			System.out.println("Please select the option..");
+			int num1 = scan.nextInt();
+
+			Connection con = null;
+
+			if (num1 == 1) {
+				String mafDate = "12.12.2000";
+				String expDate = "22.01.2019";
+
+				Date dmanf = new SimpleDateFormat("dd.MM.yyyy").parse(mafDate);
+				Date dexp = new SimpleDateFormat("dd.MM.yyyy").parse(expDate);
+
+				Product product = new Product();
+
+				Product product2 = new Product(7, "abc", new java.sql.Date(dmanf.getTime()),
+						new java.sql.Date(dexp.getTime()), 3, 200);
+
+				String sql = "insert into product(id,productName, dateOfManuf, dateOfExp, qnty, price)"
+						+ "values(?,?,?,?,?,?)";
+
+				try {
+					con = OracleDBConnection.getConnection();
+					PreparedStatement pstmt = con.prepareStatement(sql);
+					pstmt.setInt(1, product2.getpId());
+					pstmt.setString(2, product2.getProductName());
+					pstmt.setDate(3, new java.sql.Date(product2.getDateOfManuf().getTime()));
+					pstmt.setDate(4, new java.sql.Date(product2.getDateOfExp().getTime()));
+					pstmt.setInt(5, product2.getQuantity());
+					pstmt.setDouble(6, product2.getPrice());
+
+					int count = pstmt.executeUpdate();
+					System.out.println(count + "number of data inserted");
+
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (num1 == 2) {
+
+				String sql = "select productName, dateOfManuf, dateOfExp, qnty, price from product";
+
+				try {
+
+					con = OracleDBConnection.getConnection();
+
+					Statement stmt = con.createStatement();
+					ResultSet resultSet = stmt.executeQuery(sql);
+
+					while (resultSet.next()) {
+
+						String name = resultSet.getString("PRODUCTNAME");
+						Date date1 = resultSet.getDate("DATEOFMANUF");
+						Date date2 = resultSet.getDate("DATEOFEXP");
+						int qty = resultSet.getInt("QNTY");
+						int price = resultSet.getInt("PRICE");
+
+						System.out.println("Name is = " + name);
+						System.out.println("Manufacture date is = " + date1);
+						System.out.println("Expiry date is = " + date2);
+						System.out.println("Quantity is = " + qty);
+						System.out.println("Price is = " + price);
+
+						System.out.println("*****************************************************");
+					}
+				} catch (SQLException | ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+
+			} else if (num1 == 3) {
+				System.out.println("off");
+				System.exit(0);
+			} else {
+				System.out.println("Wrong Input, please try again !!");
+			}
+
+			System.out.println("Do you want to check option again ?");
+			String ans = scan.next();
+			if (ans.equalsIgnoreCase("no"))
+				break;
+		} while (true);
+		System.out.println("Thank you for using Application");
+
+	}
+
+}

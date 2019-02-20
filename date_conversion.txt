@@ -1,0 +1,26 @@
+String mafDate = "12.12.2000";
+				String expDate = "22.01.2019";
+
+				Date dmanf = new SimpleDateFormat("dd.MM.yyyy").parse(mafDate);
+				Date dexp = new SimpleDateFormat("dd.MM.yyyy").parse(expDate);
+
+				Product product = new Product();
+
+				Product product2 = new Product(7, "abc", new java.sql.Date(dmanf.getTime()),
+						new java.sql.Date(dexp.getTime()), 3, 200);
+
+				String sql = "insert into product(id,productName, dateOfManuf, dateOfExp, qnty, price)"
+						+ "values(?,?,?,?,?,?)";
+
+				try {
+					con = OracleDBConnection.getConnection();
+					PreparedStatement pstmt = con.prepareStatement(sql);
+					pstmt.setInt(1, product2.getpId());
+					pstmt.setString(2, product2.getProductName());
+					pstmt.setDate(3, new java.sql.Date(product2.getDateOfManuf().getTime()));
+					pstmt.setDate(4, new java.sql.Date(product2.getDateOfExp().getTime()));
+					pstmt.setInt(5, product2.getQuantity());
+					pstmt.setDouble(6, product2.getPrice());
+
+					int count = pstmt.executeUpdate();
+					System.out.println(count + "number of data inserted");
